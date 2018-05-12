@@ -1,12 +1,3 @@
-"""
-Wiki-trick: the eternal philosophy.
-1. Starts from a random wiki page and trying to redirecting to philosophy page
-2. For n pages, calculate the rate and distance distribution to philosophy page
-3. To reduce number of HTTP requests, a memo is applied (to record the visited page distances to philosophy)
-Author: Jiahan Yan
-Environment: python 3.5.2. Anaconda 2.4.1.
-"""
-
 import re
 import socket
 import urllib.request
