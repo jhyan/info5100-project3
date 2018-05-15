@@ -7,6 +7,9 @@
 
     <style>
 	
+  body{
+    font: 12px sans-serif;
+  }
 	.node {
 		cursor: pointer;
 	}
@@ -39,9 +42,20 @@
 <script>
 
 // ************** Generate the tree diagram	 *****************
+var tooltip = d3.select("body")
+  .append("div")
+  .style("position", "absolute")
+  .style("z-index", "10")
+  .style("visibility", "hidden")
+  .style("background", "#f2f2f2")
+  .style("border", "1px")
+  .style("border-radius", "4px")
+  .style("padding", '5px');
+
+
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-	width = 1200 - margin.right - margin.left,
-	height = 1200 - margin.top - margin.bottom;
+	width = 1600 - margin.right - margin.left,
+	height = 1600 - margin.top - margin.bottom;
 	
 var i = 0,
 	duration = 750,
@@ -49,7 +63,7 @@ var i = 0,
 
 var tree = d3.layout.tree()
 	.size([2 * Math.PI, width/2])
-    .separation(function(a, b) { return (a.parent == b.parent ? 0.6 : 1.5) / a.depth; });
+    .separation(function(a, b) { return (a.parent == b.parent ? 0.8 : 1.5) / a.depth; });
 
 var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.y, d.x]; });
@@ -65,7 +79,7 @@ var map = d3.map();
 
 d3.select(self.frameElement).style("height", "500px");
 
-d3.json("sport.json", function(error, data) {
+d3.json("Math.json", function(error, data) {
   
   var root = stratify(map, data);
   var nodes = tree.nodes(root).reverse(),
@@ -116,9 +130,21 @@ d3.json("sport.json", function(error, data) {
 	    return "translate(" + xs(d) + "," + ys(d) + ")";})
 	  
     node.append("circle")
-      .attr("r", 1);
-  
-    node.append("text")
+      .attr("r", 3)
+      .on("mousemove", function(d){
+        d3.select(this).attr("r", 5);
+        if(!d.children) return;
+        tooltip
+          .text(d.id)
+          .style("visibility", "visible")
+          .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
+      .on("mouseout", function(d){
+        d3.select(this).attr("r", 3);
+        if(!d.children) return;
+        tooltip.style("visibility", "hidden");});  
+
+    g.selectAll(".node--leaf")
+      .append("text")
       .attr("dy", "0.31em")
       .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
       .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })

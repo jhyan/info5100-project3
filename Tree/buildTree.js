@@ -8,7 +8,8 @@ function stratify(nodes, data) {
   var root = Node(data[0][0])
   nodes.set(data[0][0], root);
   for(var i=0; i<data.length; i++) {
-    append(nodes, data[i]);
+    if(data[i].length>1) 
+      append(nodes, data[i]);
   }
   return root;
 }
