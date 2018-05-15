@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Tree Example</title>
+
+    <style>
+	
+	.node {
+		cursor: pointer;
+	}
+
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 3px;
+	}
+
+	.node text {
+	  font: 12px sans-serif;
+	}
+
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 2px;
+	}
+	
+    </style>
+
+  </head>
+
+  <body>
+
+<!-- load the d3.js library -->	
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="./buildTree.js"></script>	
+<script>
+
+// ************** Generate the tree diagram	 *****************
+var margin = {top: 20, right: 120, bottom: 20, left: 120},
+	width = 1200 - margin.right - margin.left,
+	height = 1200 - margin.top - margin.bottom;
+	
+var i = 0,
+	duration = 750,
+	root;
+
+var tree = d3.layout.tree()
+	.size([2 * Math.PI, width/2])
+    .separation(function(a, b) { return (a.parent == b.parent ? 0.6 : 1.5) / a.depth; });
+
+var diagonal = d3.svg.diagonal()
+	.projection(function(d) { return [d.y, d.x]; });
+
+var svg = d3.select("body").append("svg")
+	.attr("width", width + margin.right + margin.left)
+	.attr("height", height + margin.top + margin.bottom)
+var g =svg.append("g")
+	.attr("transform", "translate(" + (width/2+margin.left) + "," + (height/2+margin.top) + ")");
+
+ 
+var map = d3.map(); 
+
+d3.select(self.frameElement).style("height", "500px");
+
+d3.json("sport.json", function(error, data) {
+  
+  var root = stratify(map, data);
+  var nodes = tree.nodes(root).reverse(),
+      links = tree.links(nodes);
+
+  var maxDepth = d3.max(data.map(d=>d.length));
+  var raidus = d3.range(0, maxDepth, 1)
+  var circle = g.selectAll(".circle")
+    .data(raidus)
+    .enter()
+    .append('circle')
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', function(d) {return (d+1)*width/2/maxDepth;})
+    .attr('fill', 'none')
+    .attr('stroke', 'grey')
+    .attr('opacity', 0.1)
+
+  // var link = g.selectAll(".link")
+  //   .data(links)
+  //   .enter()
+  //   .append("line")
+  //   .attr("class", "link")
+  //   .attr("stroke","#ccc")
+  //   .attr("x1", function(d) { return xs(d.source); })
+  //   .attr("y1", function(d) { return ys(d.source); })
+  //   .attr("x2", function(d) { return xs(d.target); })
+  //   .attr("y2", function(d) { return ys(d.target); });
+  var link = g.selectAll(".link")
+    .data(links)
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr("stroke","#ccc")
+  	.attr("d", function(d) {
+  	  var i = {y:xs(d.source), x:ys(d.source)}
+  	  var o = {y:xs(d.target), x:ys(d.target)}
+  	  return diagonal({source: o, target: i});
+  	});
+
+  var node = g.selectAll(".node")
+    .data(nodes)
+    .enter()
+    .append("g")
+	  .attr("class", function(d) { 
+	    return "node" + (d.children ? " node--internal" : " node--leaf"); })
+	  .attr("transform", function(d) {
+	    return "translate(" + xs(d) + "," + ys(d) + ")";})
+	  
+    node.append("circle")
+      .attr("r", 1);
+  
+    node.append("text")
+      .attr("dy", "0.31em")
+      .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
+      .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
+      .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
+      .text(function(d) { return d.children?"":d.id; });
+
+  // Stash the old positions for transition.
+  nodes.forEach(function(d) {
+  	d.x0 = d.x;
+  	d.y0 = d.y;
+  });
+});
+
+
+function xs(d) { return d.y * Math.cos(d.x - Math.PI / 2); }
+function ys(d) { return d.y * Math.sin(d.x - Math.PI / 2); }
+// Toggle children on click.
+function click(d) {
+  if (d.children) {
+	d._children = d.children;
+	d.children = null;
+  } else {
+	d.children = d._children;
+	d._children = null;
+  }
+  update(d);
+}
+
+</script>
+	
+  </body>
+</html>
