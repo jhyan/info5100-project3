@@ -4,44 +4,44 @@
     <meta charset="utf-8">
 
     <title>Tree Example</title>
-
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
     <style>
-	
+
   body{
     font: 12px sans-serif;
+    font-family: 'Amatic SC', Calibri, sans-serif;
+    /* background: #222;
+    color: #aaa; */
   }
 	.node {
 		cursor: pointer;
 	}
-
 	.node circle {
 	  fill: #fff;
 	  stroke: steelblue;
 	  stroke-width: 3px;
 	}
-
 	.node text {
 	  font: 12px sans-serif;
 	}
-
 	.link {
 	  fill: none;
 	  stroke: #ccc;
 	  stroke-width: 2px;
 	}
-	
+
     </style>
 
   </head>
 
   <body>
 
-<!-- load the d3.js library -->	
+<!-- load the d3.js library -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
 <script src="./buildTree.js"></script>	
 <script>
-
 // ************** Generate the tree diagram	 *****************
 var tooltip = d3.select("body")
   .append("div")
@@ -52,32 +52,25 @@ var tooltip = d3.select("body")
   .style("border", "1px")
   .style("border-radius", "4px")
   .style("padding", '5px');
-
-
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
 	width = 1600 - margin.right - margin.left,
 	height = 1600 - margin.top - margin.bottom;
-	
+
 var i = 0,
 	duration = 750,
 	root;
-
 var tree = d3.layout.tree()
 	.size([2 * Math.PI, width/2])
     .separation(function(a, b) { return (a.parent == b.parent ? 0.8 : 1.5) / a.depth; });
-
 var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.y, d.x]; });
-
 var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.right + margin.left)
 	.attr("height", height + margin.top + margin.bottom)
 var g =svg.append("g")
 	.attr("transform", "translate(" + (width/2+margin.left) + "," + (height/2+margin.top) + ")");
-
- 
-var map = d3.map(); 
-
+var nodes;
+var map = d3.map();
 d3.select(self.frameElement).style("height", "500px");
 
 
@@ -107,7 +100,7 @@ function update(data, duration) {
   
   var map = d3.map();
   var root = stratify(map, data);
-  var nodes = tree.nodes(root).reverse(),
+  nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
   console.log(root);
   console.log(nodes)
@@ -164,6 +157,7 @@ function update(data, duration) {
       return diagonal({source: o, target: i});      
     })
 
+
   var node = g.selectAll(".node")
     .data(nodes)
 
@@ -176,8 +170,14 @@ function update(data, duration) {
     .attr("class", function(d) { 
       return "node" + (d.children ? " node--internal" : " node--leaf"); })
     .append("circle")
+	  .attr("transform", function(d) {
+	    return "translate(" + xs(d) + "," + ys(d) + ")";})
+
+    node.append("circle")
       .attr("r", 3)
+      .attr("id", function(d){return d.id})
       .on("mousemove", function(d){
+        highlight(d);
         d3.select(this).attr("r", 5);
         if(!d.children) return;
         tooltip
@@ -197,7 +197,6 @@ function update(data, duration) {
           console.log(d.x, d.y)
           console.log(xs(d), ys(d));
         }
-
         return "translate(" + xs(d) + "," + ys(d) + ")";})
 
     g.selectAll(".node--leaf")
@@ -207,7 +206,6 @@ function update(data, duration) {
       .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
       .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
       .text(function(d) { return d.children?"":d.id; });
-
   // Stash the old positions for transition.
   nodes.forEach(function(d) {
     d.x0 = d.x;
@@ -312,7 +310,30 @@ function click(d) {
   }
 }
 
+function highlight(d) {
+  var path = new Set();
+  while (d.depth>1) {
+    path.add(d);
+    d = d.parent;
+  }
+  var legend;
+  legend = d.id;
+  d3.select("fieldset").remove();
+  var fieldset = d3.select("body").append("fieldset")
+  .attr("left", d.x+30)
+  .attr("top", d.y+30);
+  fieldset.append("legend").html("Path from "+legend + " to Philosophy");
+  path.forEach(function(element) {
+    fieldset.append("li")
+    .html("<strong>"+ element.id +"</strong>: ")
+  })
+  svg.selectAll('.node circle')
+  .attr("fill", function(d) {
+    if(path.has(d.id)) return "red";
+    else return "grey";
+  })
+}
 </script>
-	
+
   </body>
 </html>

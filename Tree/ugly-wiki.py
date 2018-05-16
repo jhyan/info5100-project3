@@ -7,17 +7,18 @@ from collections import defaultdict
 import json
 import sys
 
-src_url = sys.argv[1]
-des_url = sys.argv[2]
+# src_url = sys.argv[1]
+# des_url = sys.argv[2]
 
 PAGE_CNT = 1 # number of pages used to draw the distribution of distance to philosophy
 TIME_LIMIT = 60 # define "unreachable to philosophy" as "can reach philosophy in 60 seconds"
 PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting url
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
-RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
-# sports_words = ["http://en.wikipedia.org/wiki/Sport"]
+
+
+INTERESTED = 'animals'
 sports_words = []
-with open(src_url, 'r') as f:
+with open( '../txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
         sports_words.append("https://en.wikipedia.org/wiki/" + word)
@@ -105,9 +106,9 @@ class wiki_page():
                     self.url_candidates.append(url)
         return self.url_candidates
 
+
 def main():
     unreachable = 0 # unreachable url count
-    distri = defaultdict(int) # key: page idx, val: distance to philosophy
     memo = defaultdict(int) # a memo to record the visited page distances to philosophy
     PAGE_CNT = len(sports_words)
     res = [];
@@ -125,6 +126,7 @@ def main():
         res.append([page.url[30:]]) # avoid infinite loops
         # loop until philosophy is found.
         while page.url != PHILOSOPHY:
+            print (page.url)
             #if add_node not in data['nodes']:
                 #data["nodes"].append(add_node)
                 # nodes_set.add(page.url)
@@ -168,36 +170,11 @@ def main():
 
     # summary printout
     print ("res: \n", res)
-    # print ("data: \n", data)
-
-    # print ("memo: ", memo)
-    # print ("distribution: ", distri)
-    # print("unreachable: ", unreachable)
-    # print ( "reachable rate: " + str((PAGE_CNT - unreachable)/float(PAGE_CNT)))
 
     data = json.dumps(res)
-    with open(des_url, 'w') as f:
+    with open("../jsons/" + INTERESTED + '_tree' + ".json", 'w') as f:
         f.write(data)
 
-    # draw the density distribution (Distance to philosophy v.s. # of pages)
-    # distance_list = list(distri.values())
-    # density = defaultdict(int)
-    # for v in distance_list:
-    #     density[v] += 1
-    # x_min, x_max = min(distance_list), max(distance_list) # get min max of a axis values
-    # x_axis = list(range(x_min, x_max + 1, 1))
-    # y_axis = []
-    # for dis in x_axis: # fill y axis values
-    #     if dis not in density:
-    #         y_axis.append(0)
-    #     else:
-    #         y_axis.append(density[dis])
-    # plt.bar(x_axis, y_axis, align="center")
-    # plt.title("Distance to philosophy v.s. # of pages")
-    # plt.xlabel('Distance to philosophy')
-    # plt.ylabel('# of pages')
-    # plt.savefig("distribution") # save before show()
-    # plt.show()
 
 if __name__ == "__main__":
     main()
