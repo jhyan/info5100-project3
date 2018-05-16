@@ -6,41 +6,39 @@
     <title>Tree Example</title>
 
     <style>
-	
+
   body{
     font: 12px sans-serif;
+    background: #222;
+    color: #aaa;
   }
 	.node {
 		cursor: pointer;
 	}
-
 	.node circle {
 	  fill: #fff;
 	  stroke: steelblue;
 	  stroke-width: 3px;
 	}
-
 	.node text {
 	  font: 12px sans-serif;
 	}
-
 	.link {
 	  fill: none;
 	  stroke: #ccc;
 	  stroke-width: 2px;
 	}
-	
+
     </style>
 
   </head>
 
   <body>
 
-<!-- load the d3.js library -->	
+<!-- load the d3.js library -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="./buildTree.js"></script>	
+<script src="./buildTree.js"></script>
 <script>
-
 // ************** Generate the tree diagram	 *****************
 var tooltip = d3.select("body")
   .append("div")
@@ -51,40 +49,31 @@ var tooltip = d3.select("body")
   .style("border", "1px")
   .style("border-radius", "4px")
   .style("padding", '5px');
-
-
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
 	width = 1600 - margin.right - margin.left,
 	height = 1600 - margin.top - margin.bottom;
-	
+
 var i = 0,
 	duration = 750,
 	root;
-
 var tree = d3.layout.tree()
 	.size([2 * Math.PI, width/2])
     .separation(function(a, b) { return (a.parent == b.parent ? 0.8 : 1.5) / a.depth; });
-
 var diagonal = d3.svg.diagonal()
 	.projection(function(d) { return [d.y, d.x]; });
-
 var svg = d3.select("body").append("svg")
 	.attr("width", width + margin.right + margin.left)
 	.attr("height", height + margin.top + margin.bottom)
 var g =svg.append("g")
 	.attr("transform", "translate(" + (width/2+margin.left) + "," + (height/2+margin.top) + ")");
-
- 
-var map = d3.map(); 
-
+var nodes;
+var map = d3.map();
 d3.select(self.frameElement).style("height", "500px");
+d3.json("sport.json", function(error, data) {
 
-d3.json("Math.json", function(error, data) {
-  
   var root = stratify(map, data);
-  var nodes = tree.nodes(root).reverse(),
+  nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
-
   var maxDepth = d3.max(data.map(d=>d.length));
   var raidus = d3.range(0, maxDepth, 1)
   var circle = g.selectAll(".circle")
@@ -97,7 +86,6 @@ d3.json("Math.json", function(error, data) {
     .attr('fill', 'none')
     .attr('stroke', 'grey')
     .attr('opacity', 0.1)
-
   // var link = g.selectAll(".link")
   //   .data(links)
   //   .enter()
@@ -119,19 +107,19 @@ d3.json("Math.json", function(error, data) {
   	  var o = {y:xs(d.target), x:ys(d.target)}
   	  return diagonal({source: o, target: i});
   	});
-
   var node = g.selectAll(".node")
     .data(nodes)
     .enter()
     .append("g")
-	  .attr("class", function(d) { 
+	  .attr("class", function(d) {
 	    return "node" + (d.children ? " node--internal" : " node--leaf"); })
 	  .attr("transform", function(d) {
 	    return "translate(" + xs(d) + "," + ys(d) + ")";})
-	  
+
     node.append("circle")
       .attr("r", 3)
       .on("mousemove", function(d){
+        highlight(d);
         d3.select(this).attr("r", 5);
         if(!d.children) return;
         tooltip
@@ -141,8 +129,7 @@ d3.json("Math.json", function(error, data) {
       .on("mouseout", function(d){
         d3.select(this).attr("r", 3);
         if(!d.children) return;
-        tooltip.style("visibility", "hidden");});  
-
+        tooltip.style("visibility", "hidden");});
     g.selectAll(".node--leaf")
       .append("text")
       .attr("dy", "0.31em")
@@ -150,15 +137,12 @@ d3.json("Math.json", function(error, data) {
       .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
       .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
       .text(function(d) { return d.children?"":d.id; });
-
   // Stash the old positions for transition.
   nodes.forEach(function(d) {
   	d.x0 = d.x;
   	d.y0 = d.y;
   });
 });
-
-
 function xs(d) { return d.y * Math.cos(d.x - Math.PI / 2); }
 function ys(d) { return d.y * Math.sin(d.x - Math.PI / 2); }
 // Toggle children on click.
@@ -173,7 +157,21 @@ function click(d) {
   update(d);
 }
 
+function highlight(d) {
+  var path = [];
+  while (d.depth>1) {
+    path.push(d);
+    d = d.parent;
+  }
+  console.log(path);
+  path.forEach(function(element) {
+    svg.append("text")
+    .attr("x", element.x + 8)
+    .attr("y", element.y + 8)
+    .text(element.id);
+  })
+}
 </script>
-	
+
   </body>
 </html>
