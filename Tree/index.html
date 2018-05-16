@@ -10,6 +10,7 @@
 
   body{
     font: 12px sans-serif;
+    color: grey;
     /*font-family: 'Amatic SC', Calibri, sans-serif;*/
     /* background: #222;
     color: #aaa; */
@@ -52,8 +53,8 @@ var tooltip = d3.select("body")
   .style("padding", '5px');
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-	width = 1600 - margin.right - margin.left,
-	height = 1600 - margin.top - margin.bottom;
+	width = 1200 - margin.right - margin.left,
+	height = 1200 - margin.top - margin.bottom;
 
 var i = 0,
 	duration = 750,
@@ -84,7 +85,7 @@ queue()
   .await(function(err, data1, data2, data3, data4) {
     datamap = {
       'culture': data1,
-      'computer science': data2,
+      'CS': data2,
       'animals': data3,
       'sports': data4
     }
@@ -100,7 +101,21 @@ queue()
       .enter()
       .append("g")
       .attr('class', "button")
-      .on()
+      .attr('cursor', "pointer")
+      .on('mousemove', function() {
+        d3.select(this).select("rect").attr("opacity", 0.9)
+      })
+      .on('mouseout', function() {
+        d3.select(this).select("rect").attr("opacity", 0.6)
+      })
+      .on('click', function(d){
+        controller[d] = !controller[d];
+        d3.select(this).select("rect")
+        .attr('fill', function(d) {
+          return controller[d]?"#ccc":"#fff";
+        })
+        update(500);
+      })
 
     button
       .append("rect")
@@ -108,8 +123,11 @@ queue()
       .attr('y', function(d, i) {return 100})
       .attr('width', function(d, i) {return 70})
       .attr('height', function(d, i) {return 40})
-      .attr('fill', "white")
-      .attr('stroke', "grey");
+      .attr('fill', function(d) {
+        return controller[d]?"#ccc":"#fff";
+      })
+      .attr('stroke', "grey")
+      .attr("opacity", 0.6)
 
     button
       .append("text")
@@ -132,21 +150,21 @@ function update(duration) {
   data = data.filter(function(d,i) {
     return d!=undefined;
   })
+  console.log("numbre of nodes is %d", data.length);
   var map = d3.map();
   var root = stratify(map, data);
   nodes = tree.nodes(root).reverse(),
-      links = tree.links(nodes);
+  links = tree.links(nodes);
 
   var maxDepth = d3.max(data.map(d=>d.length));
   var raidus = d3.range(0, maxDepth, 1)
 
-  console.log(raidus.length);
   var circle = g.selectAll(".circle")
     .data(raidus)
   
-  circle.exit().remove();
+  var circleExit = circle.exit().remove();
 
-  circle
+  var circleEnter = circle
     .enter()
     .append('circle')
     .attr("class", "circle")
@@ -157,37 +175,35 @@ function update(duration) {
     .attr('stroke', 'grey')
     .attr('opacity', 0.1)
 
-  circle.transition()
-  .duration(duration)
-  .attr("r",function(d) {return (d+1)*width/2/maxDepth;})
+  circle
+    .attr("r",function(d) {return (d+1)*width/2/maxDepth;})
+
 
   var link = g.selectAll(".link")
     .data(links)
 
-  link.exit().remove()
 
-  link.enter()
-    .append("path")
+  var linkEnter = link.enter()
+    .insert("path")
     .attr("class", "link")
     .attr("stroke","#ccc")
     .attr("d", function(d) {
       var o = {y:0, x:0}
       var i = {y:0, x:0}
-      // var i = {y:xs(d.source), x:ys(d.source)}
-      // var o = {y:xs(d.target), x:ys(d.target)}
       return diagonal({source: o, target: i});
     });
 
 
-    link.transition()
+  link.transition()
     .duration(duration)
     .attr("d", function(d) {
-      // var o = {y:0, x:0}
-      // var i = {y:0, x:0}
       var i = {y:xs(d.source), x:ys(d.source)}
       var o = {y:xs(d.target), x:ys(d.target)}
       return diagonal({source: o, target: i});      
     })
+
+  link.exit().remove();
+
 
 
   var node = g.selectAll(".node")
@@ -195,19 +211,23 @@ function update(duration) {
 
   node.exit().remove()
 
-  node
-    .enter()
+  var nodeEnter = node.enter()
     .append("g")
-    .attr("id", function(d) {return d.id;})
-    .attr("class", function(d) { 
-      return "node" + (d.children ? " node--internal" : " node--leaf"); })
-    .append("circle")
-	  .attr("transform", function(d) {
-	    return "translate(" + xs(d) + "," + ys(d) + ")";})
+    .attr("class", "node");
+    
+  nodeEnter.append("circle")
+	  .attr("r", 1e-6)
+    // node.exit().remove()
+  var nodeUpdate = node.transition()
+      .duration(duration)
+      .attr("id", function(d) {return d.id;})
+      .attr("class", function(d) { 
+        return "node" + (d.children ? " node--internal" : " node--leaf"); })   
+      .attr("transform", function(d) {
+        return "translate(" + xs(d) + "," + ys(d) + ")";})
 
-    node.append("circle")
-      .attr("r", 3)
-      .attr("id", function(d){return d.id})
+  node.select("circle")
+      .attr("r", 2)
       .on("mousemove", function(d){
         highlight(d);
         d3.select(this).attr("r", 5);
@@ -217,19 +237,9 @@ function update(duration) {
           .style("visibility", "visible")
           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
       .on("mouseout", function(d){
-        d3.select(this).attr("r", 3);
+        d3.select(this).attr("r", 2);
         if(!d.children) return;
         tooltip.style("visibility", "hidden");});  
-
-    // node.exit().remove()
-    node.transition()
-      .duration(duration)
-      .attr("transform", function(d) {
-        if(d.id=='Philosophy') {
-          console.log(d.x, d.y)
-          console.log(xs(d), ys(d));
-        }
-        return "translate(" + xs(d) + "," + ys(d) + ")";})
 
     // g.selectAll(".node--leaf")
     //   .append("text")
@@ -245,102 +255,10 @@ function update(duration) {
   });
 };
 
-// d3.json("science.json", function(error, data) {
-  
-//   var root = stratify(map, data);
-//   var nodes = tree.nodes(root).reverse(),
-//       links = tree.links(nodes);
-
-//   console.log(nodes)
-//   console.log(links)
-
-//   var maxDepth = d3.max(data.map(d=>d.length));
-//   var raidus = d3.range(0, maxDepth, 1)
-//   var circle = g.selectAll(".circle")
-//     .data(raidus)
-//     .enter()
-//     .append('circle')
-//     .attr('cx', 0)
-//     .attr('cy', 0)
-//     .attr('r', function(d) {return (d+1)*width/2/maxDepth;})
-//     .attr('fill', 'none')
-//     .attr('stroke', 'grey')
-//     .attr('opacity', 0.1)
-
-//   // var link = g.selectAll(".link")
-//   //   .data(links)
-//   //   .enter()
-//   //   .append("line")
-//   //   .attr("class", "link")
-//   //   .attr("stroke","#ccc")
-//   //   .attr("x1", function(d) { return xs(d.source); })
-//   //   .attr("y1", function(d) { return ys(d.source); })
-//   //   .attr("x2", function(d) { return xs(d.target); })
-//   //   .attr("y2", function(d) { return ys(d.target); });
-//   var link = g.selectAll(".link")
-//     .data(links)
-//     .enter()
-//     .append("path")
-//     .attr("class", "link")
-//     .attr("stroke","#ccc")
-//   	.attr("d", function(d) {
-//   	  var i = {y:xs(d.source), x:ys(d.source)}
-//   	  var o = {y:xs(d.target), x:ys(d.target)}
-//   	  return diagonal({source: o, target: i});
-//   	});
-
-//   var node = g.selectAll(".node")
-//     .data(nodes)
-//     .enter()
-//     .append("g")
-// 	  .attr("class", function(d) { 
-// 	    return "node" + (d.children ? " node--internal" : " node--leaf"); })
-// 	  .attr("transform", function(d) {
-// 	    return "translate(" + xs(d) + "," + ys(d) + ")";})
-	  
-//     node.append("circle")
-//       .attr("r", 3)
-//       .on("mousemove", function(d){
-//         d3.select(this).attr("r", 5);
-//         if(!d.children) return;
-//         tooltip
-//           .text(d.id)
-//           .style("visibility", "visible")
-//           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
-//       .on("mouseout", function(d){
-//         d3.select(this).attr("r", 3);
-//         if(!d.children) return;
-//         tooltip.style("visibility", "hidden");});  
-
-//     g.selectAll(".node--leaf")
-//       .append("text")
-//       .attr("dy", "0.31em")
-//       .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
-//       .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
-//       .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
-//       .text(function(d) { return d.children?"":d.id; });
-
-//   // Stash the old positions for transition.
-//   nodes.forEach(function(d) {
-//   	d.x0 = d.x;
-//   	d.y0 = d.y;  
-//   });
-
-// });
-
 
 function xs(d) { return d.y * Math.cos(d.x - Math.PI / 2); }
 function ys(d) { return d.y * Math.sin(d.x - Math.PI / 2); }
-// Toggle children on click.
-function click(d) {
-  if (d.children) {
-	d._children = d.children;
-	d.children = null;
-  } else {
-	d.children = d._children;
-	d._children = null;
-  }
-}
+
 
 function highlight(d) {
   var path = new Set();
@@ -352,8 +270,9 @@ function highlight(d) {
   legend = d.id;
   d3.select("fieldset").remove();
   var fieldset = d3.select("body").append("fieldset")
-  .attr("left", d.x+30)
-  .attr("top", d.y+30);
+  .style("position", "absolute")
+  .style("left", (width+margin['left']+margin['right'])+"px")
+  .style("top", 100+"px");
   fieldset.append("legend").html("Path from "+legend + " to Philosophy");
   path.forEach(function(element) {
     fieldset.append("li")

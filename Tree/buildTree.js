@@ -5,6 +5,7 @@
 // height:?
 
 function stratify(nodes, data) {
+  if(data.length<1) return {};
   if(!nodes.get(data[0][0]))
     nodes.set(data[0][0], Node(data[0][0]));
   for(var i=0; i<data.length; i++) {
