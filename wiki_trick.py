@@ -9,13 +9,13 @@ import json
 
 
 PAGE_CNT = 1 # number of pages used to draw the distribution of distance to philosophy
-TIME_LIMIT = 60 # define "unreachable to philosophy" as "can reach philosophy in 60 seconds"
+TIME_LIMIT = 120
 PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting url
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
-# sports_words = ["http://en.wikipedia.org/wiki/Sport"]
 sports_words = []
-with open('sports.txt', 'r') as f:
+INTERESTED = "culture"
+with open( './txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
         sports_words.append("http://en.wikipedia.org/wiki/" + word)
@@ -25,7 +25,7 @@ print ('interested words: ', sports_words)
 
 class wiki_page():
     """
-    a wiki_page class able to extract the page body, clean the content and find next urls. 
+    a wiki_page class able to extract the page body, clean the content and find next urls.
     """
     def __init__(self, url):
         self.url = url
@@ -110,7 +110,6 @@ def main():
     PAGE_CNT = len(sports_words)
     res = {} # 3300 project3
     data = {"nodes":[], "links":[]}
-    nodes_set = set([])
 
     for i in range(PAGE_CNT):
         try:
@@ -121,8 +120,8 @@ def main():
             old_time = time() # timestamp before searching
             page = wiki_page(sports_words[i])
             visited = [page] # avoid infinite loops
-            # loop until philosophy is found.
             while page.url != PHILOSOPHY:
+                print (page.url)
                 add_node = {"id": page.url, "group": 1}
                 if add_node not in data['nodes']:
                     data["nodes"].append(add_node)
@@ -136,7 +135,6 @@ def main():
                     data["links"].append({"source": page.url, "target": next_url, "value": 100})
                     if {"id": next_url, "group": 1} not in data['nodes']:
                         data["nodes"].append({"id": next_url, "group": 1})
-                        # nodes_set.add(next_url)
 
                     if next_url in memo: # in memo break directly
                         in_memo = True
@@ -188,7 +186,7 @@ def main():
     print ( "reachable rate: " + str((PAGE_CNT - unreachable)/float(PAGE_CNT)))
 
     data = json.dumps(data)
-    with open("/Users/jiahan/Documents/5100/p3.1/miserables.json", 'w') as f:
+    with open("/Users/jiahan/Documents/5100/info5100-project3/jsons/" + INTERESTED + ".json", 'w') as f:
         f.write(data)
 
     # draw the density distribution (Distance to philosophy v.s. # of pages)
@@ -216,4 +214,3 @@ if __name__ == "__main__":
 
 ############## side notes
 # soup.find method return type <class 'bs4.element.Tag'>. findall method return type <class 'bs4.element.ResultSet'>
-

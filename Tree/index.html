@@ -69,6 +69,7 @@ var g =svg.append("g")
 var nodes;
 var map = d3.map();
 d3.select(self.frameElement).style("height", "500px");
+
 d3.json("sport.json", function(error, data) {
 
   var root = stratify(map, data);
