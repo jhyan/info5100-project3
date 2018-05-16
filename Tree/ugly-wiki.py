@@ -10,13 +10,12 @@ import sys
 # src_url = sys.argv[1]
 # des_url = sys.argv[2]
 
-PAGE_CNT = 1 # number of pages used to draw the distribution of distance to philosophy
 TIME_LIMIT = 60 # define "unreachable to philosophy" as "can reach philosophy in 60 seconds"
 PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting url
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 
 
-INTERESTED = 'animals'
+INTERESTED = 'compsci'
 sports_words = []
 with open( '../txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
@@ -114,50 +113,44 @@ def main():
     res = [];
 
     for i in range(PAGE_CNT):
-        # try:
-        print ("no. ", i, ". reachable rate temp: ", (PAGE_CNT - unreachable) / float(PAGE_CNT))
-        in_memo = False # whether the url is in memo
-        print(sports_words[i])
-        Error = False
-        skip = False
-        old_time = time() # timestamp before searching
-        page = wiki_page(sports_words[i])
-        #res.append([sports_words[i]])
-        res.append([page.url[30:]]) # avoid infinite loops
-        # loop until philosophy is found.
-        while page.url != PHILOSOPHY:
-            print (page.url)
-            #if add_node not in data['nodes']:
-                #data["nodes"].append(add_node)
-                # nodes_set.add(page.url)
-            candidates = page.get_candidate_urls()
-            #print (candidates[0])
-            #print (res)
-            #print(candidates)
-            if len(candidates) == 0:
-                skip = True
-                break
-            # get next url and mark as visited
-            for next_url in candidates: # the first few canditates may be visited before so a for loop is needed
-                if next_url[30:] not in res[i]:
-                    #print(next_url[30:])
-                    try: #  avoid error: [Errno 11001] getaddrinfo failed
-                        page = wiki_page(next_url)
-                        res[i].append(page.url[30:])
-                        break
-                    except socket.gaierror:
-                        Error = True
-                        break
-            # either timeout or gaierror, skip this url. Remember to reset skip to True in next loop
-            if time()-old_time > TIME_LIMIT or Error:
-                print ("timeout or error")
-                skip = True
-                break
-            # if in memo, can update the distribution depend on memo
-        # except:
-        #     print (sports_words[i])
-        #     skip = True
-        #     continue
+        try:
+            print ("no. ", i, ". reachable rate temp: ", (PAGE_CNT - unreachable) / float(PAGE_CNT))
+            in_memo = False # whether the url is in memo
+            print(sports_words[i])
+            Error = False
+            skip = False
+            old_time = time() # timestamp before searching
+            page = wiki_page(sports_words[i])
+            #res.append([sports_words[i]])
+            res.append([page.url[30:]]) # avoid infinite loops
+            # loop until philosophy is found.
+            while page.url != PHILOSOPHY:
+                print (page.url)
+                candidates = page.get_candidate_urls()
+                if len(candidates) == 0:
+                    skip = True
+                    break
+                # get next url and mark as visited
+                for next_url in candidates: # the first few canditates may be visited before so a for loop is needed
+                    if next_url[30:] not in res[i]:
+                        #print(next_url[30:])
+                        try: #  avoid error: [Errno 11001] getaddrinfo failed
+                            page = wiki_page(next_url)
+                            res[i].append(page.url[30:])
+                            break
+                        except socket.gaierror:
+                            Error = True
+                            break
+                # either timeout or gaierror, skip this url. Remember to reset skip to True in next loop
+                if time()-old_time > TIME_LIMIT or Error:
+                    print ("timeout or error")
+                    skip = True
+                    break
+                # if in memo, can update the distribution depend on memo
+        except:
+            print ('skipped: ', sports_words[i])
+            skip = True
+            continue
 
         # if timeout or error, give up this link and continue the next one
         #print (res)
@@ -166,7 +159,6 @@ def main():
         if skip:
             unreachable += 1
             continue
-        # if luckily a cache hit, update distribution and memo. Notice here visited doesn't contain the cached url we are resorting to.
 
     # summary printout
     print ("res: \n", res)
