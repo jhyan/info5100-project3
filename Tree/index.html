@@ -10,7 +10,7 @@
 
   body{
     font: 12px sans-serif;
-    font-family: 'Amatic SC', Calibri, sans-serif;
+    /*font-family: 'Amatic SC', Calibri, sans-serif;*/
     /* background: #222;
     color: #aaa; */
   }
@@ -30,11 +30,9 @@
 	  stroke: #ccc;
 	  stroke-width: 2px;
 	}
-
     </style>
 
   </head>
-
   <body>
 
 <!-- load the d3.js library -->
@@ -52,6 +50,7 @@ var tooltip = d3.select("body")
   .style("border", "1px")
   .style("border-radius", "4px")
   .style("padding", '5px');
+
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
 	width = 1600 - margin.right - margin.left,
 	height = 1600 - margin.top - margin.bottom;
@@ -69,42 +68,75 @@ var svg = d3.select("body").append("svg")
 	.attr("height", height + margin.top + margin.bottom)
 var g =svg.append("g")
 	.attr("transform", "translate(" + (width/2+margin.left) + "," + (height/2+margin.top) + ")");
-var nodes;
-var map = d3.map();
+
+var datamap;
+var controller;
+
 d3.select(self.frameElement).style("height", "500px");
 
 
 queue()
-  .defer(d3.json, "sport.json")
-  .defer(d3.json, "science.json")
-  .await(function(err, data1, data2) {
-    update(data2, 500)
-    // setTimeout(function(){
-    //   console.log("=====")
-    //   var data = data1.concat(data2)
-    //   update(data,500)
-    //   setTimeout(function(){
-    //     console.log("******")
-    //     update(data2,500)
-        
-    //   }, 3000);
-    // }, 3000);
+  // .defer(d3.json, "sport.json")
+  .defer(d3.json, "../jsons/culture_tree.json")
+  .defer(d3.json, "../jsons/compsci_tree.json")
+  .defer(d3.json, "../jsons/animals_tree.json")
+  .defer(d3.json, "../jsons/sports_tree.json")
+  .await(function(err, data1, data2, data3, data4) {
+    datamap = {
+      'culture': data1,
+      'computer science': data2,
+      'animals': data3,
+      'sports': data4
+    }
+    controller = {
+      'culture': true,
+      'CS': true,
+      'animals': true,
+      'sports': true      
+    }
+
+    var button = svg.selectAll(".button")
+      .data(Object.keys(controller))
+      .enter()
+      .append("g")
+      .attr('class', "button")
+      .on()
+
+    button
+      .append("rect")
+      .attr('x', function(d, i) {return i*80+100})
+      .attr('y', function(d, i) {return 100})
+      .attr('width', function(d, i) {return 70})
+      .attr('height', function(d, i) {return 40})
+      .attr('fill', "white")
+      .attr('stroke', "grey");
+
+    button
+      .append("text")
+      .attr('x', function(d, i) {return i*80+100+35})
+      .attr('y', function(d, i) {return 100+25})
+      .attr()
+      .attr('text-anchor', 'middle')
+      .text(function(d) {return d});
+
+    update(500);
 
   })
 
-function remove(data, duration) {
-
-}
-
-function update(data, duration) {
-  
+function update(duration) {
+  var data = [];
+  for(var key in controller) {
+    if(controller[key])
+      data = data.concat(datamap[key]);
+  }
+  data = data.filter(function(d,i) {
+    return d!=undefined;
+  })
   var map = d3.map();
   var root = stratify(map, data);
   nodes = tree.nodes(root).reverse(),
       links = tree.links(nodes);
-  console.log(root);
-  console.log(nodes)
-  console.log(links)
+
   var maxDepth = d3.max(data.map(d=>d.length));
   var raidus = d3.range(0, maxDepth, 1)
 
@@ -199,13 +231,13 @@ function update(data, duration) {
         }
         return "translate(" + xs(d) + "," + ys(d) + ")";})
 
-    g.selectAll(".node--leaf")
-      .append("text")
-      .attr("dy", "0.31em")
-      .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
-      .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
-      .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
-      .text(function(d) { return d.children?"":d.id; });
+    // g.selectAll(".node--leaf")
+    //   .append("text")
+    //   .attr("dy", "0.31em")
+    //   .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
+    //   .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
+    //   .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
+    //   .text(function(d) { return d.children?"":d.id; });
   // Stash the old positions for transition.
   nodes.forEach(function(d) {
     d.x0 = d.x;
