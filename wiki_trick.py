@@ -15,7 +15,7 @@ PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
 sports_words = []
 INTERESTED = "animals"
-with open( INTERESTED + '.txt', 'r') as f:
+with open( './txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
         sports_words.append("http://en.wikipedia.org/wiki/" + word)
@@ -186,7 +186,7 @@ def main():
     print ( "reachable rate: " + str((PAGE_CNT - unreachable)/float(PAGE_CNT)))
 
     data = json.dumps(data)
-    with open("/Users/jiahan/Documents/5100/info5100-project3/" + INTERESTED + ".json", 'w') as f:
+    with open("/Users/jiahan/Documents/5100/info5100-project3/jsons/" + INTERESTED + ".json", 'w') as f:
         f.write(data)
 
     # draw the density distribution (Distance to philosophy v.s. # of pages)
