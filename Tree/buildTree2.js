@@ -33,22 +33,25 @@ function addChild(parent, child) {
 }
 
 function append(nodes, list, group) {
-  var i = 0;
-  var node;
-  while(nodes.get(list[i])) {
-    i++;
-  }
-  node = nodes.get(list[i-1]);
-  while(i<list.length) {
-    var newNode;
-    if(i==list.length-1)
-      newNode = Node(list[i], group);
-    else 
-      newNode = Node(list[i]);
-    nodes.set(list[i], newNode);
-    addChild(node, newNode);
-    node = newNode;
-    i++;
+  var i = list.length-1;
+  var preNode;
+  var curNode;
+  while(i>=0) {
+    curNode = nodes.get(list[i]);
+    if(curNode) {
+      addChild(curNode, preNode);
+      break;
+    } else {
+      if(i==list.length-1)
+        nodes.set(list[i], Node(list[i], group));
+      else
+        nodes.set(list[i], Node(list[i]));
+      curNode = nodes.get(list[i]);
+      if(preNode)
+        addChild(curNode, preNode);
+      preNode = curNode;
+    }
+    i--;
   }
 }
 
