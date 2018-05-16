@@ -23,3 +23,8 @@ recursion computer science
 data structure
 computer architecture
 operating system
+agile development
+artificial intelligence
+robotics
+electronics
+engineering

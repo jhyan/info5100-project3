@@ -14,7 +14,7 @@ PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting ur
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
 sports_words = []
-INTERESTED = "culture"
+INTERESTED = "compsci"
 with open( './txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
@@ -121,7 +121,7 @@ def main():
             page = wiki_page(sports_words[i])
             visited = [page] # avoid infinite loops
             while page.url != PHILOSOPHY:
-                print (page.url)
+                print ("!!!" + page.url + "!!!")
                 add_node = {"id": page.url, "group": 1}
                 if add_node not in data['nodes']:
                     data["nodes"].append(add_node)

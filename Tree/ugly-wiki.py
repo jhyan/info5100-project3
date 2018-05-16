@@ -14,8 +14,7 @@ PAGE_CNT = 1 # number of pages used to draw the distribution of distance to phil
 TIME_LIMIT = 60 # define "unreachable to philosophy" as "can reach philosophy in 60 seconds"
 PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting url
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
-RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
-# sports_words = ["http://en.wikipedia.org/wiki/Sport"]
+
 sports_words = []
 with open(src_url, 'r') as f:
     for line in f.readlines():
@@ -179,25 +178,6 @@ def main():
     with open(des_url, 'w') as f:
         f.write(data)
 
-    # draw the density distribution (Distance to philosophy v.s. # of pages)
-    # distance_list = list(distri.values())
-    # density = defaultdict(int)
-    # for v in distance_list:
-    #     density[v] += 1
-    # x_min, x_max = min(distance_list), max(distance_list) # get min max of a axis values
-    # x_axis = list(range(x_min, x_max + 1, 1))
-    # y_axis = []
-    # for dis in x_axis: # fill y axis values
-    #     if dis not in density:
-    #         y_axis.append(0)
-    #     else:
-    #         y_axis.append(density[dis])
-    # plt.bar(x_axis, y_axis, align="center")
-    # plt.title("Distance to philosophy v.s. # of pages")
-    # plt.xlabel('Distance to philosophy')
-    # plt.ylabel('# of pages')
-    # plt.savefig("distribution") # save before show()
-    # plt.show()
 
 if __name__ == "__main__":
     main()
