@@ -9,7 +9,7 @@
     <style>
 
   body{
-    font: 12px sans-serif;
+    font: 12px Calibri;
     color: grey;
     /*font-family: 'Amatic SC', Calibri, sans-serif;*/
     /* background: #222;
@@ -30,11 +30,17 @@
 	  /*stroke: #ccc;*/
 	  stroke-width: 2px;
 	}
+  h1 {
+    position: absolute;
+    left: 500px;
+    top: 40px;
+  }
     </style>
+  }
 
   </head>
   <body>
-
+<h1>Path To Philosophy Through Wikipedia</h1>
 <!-- load the d3.js library -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
@@ -124,13 +130,14 @@ queue()
       .on('mouseout', function() {
         d3.select(this).select("rect").attr("opacity", 0.9)
       })
-      .on('click', function(d){
+      .on('click', function(d){        
         controller[d] = !controller[d];
         d3.select(this).select("rect")
         .attr('fill', function(d) {
           return controller[d]?colormap[d].deep:"#fff";
         })
         update(500);
+
       })
 
     button
@@ -163,8 +170,10 @@ queue()
   })
 
 function update(duration) {
+
+
   var map = d3.map();
-  var root;
+  var root = {};
   var data = [];
   for(var key in controller) {
     if(controller[key]) {
@@ -176,7 +185,7 @@ function update(duration) {
   // console.log("numbre of nodes is %d", data.length);
   nodes = tree.nodes(root).reverse(),
   links = tree.links(nodes);
-
+  showWordList(data.map(d=>d[d.length-1]))
 
   var maxDepth = d3.max(data.map(d=>d.length));
   var raidus = d3.range(0, maxDepth, 1)
@@ -260,18 +269,12 @@ function update(duration) {
       })
       .on("mousemove", function(d){
         d3.select(this).attr("r", 5);
-        if(!d.children) return;
         tooltip
           .text(d.id)
           .style("visibility", "visible")
           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
       .on("mouseout", function(d){
-        // d3.selectAll(".node").select("circle")      
-        // .attr("stroke", function(d) {
-        //   return d.group?colormap[d.group]:"#ccc";
-        // })
         d3.select(this).attr("r", 2);
-        if(!d.children) return;
         tooltip.style("visibility", "hidden");
       })
       .on('click', function(d) {
@@ -300,8 +303,8 @@ function update(duration) {
 };
 
 
-function xs(d) { return d.y * Math.cos(d.x - Math.PI / 2); }
-function ys(d) { return d.y * Math.sin(d.x - Math.PI / 2); }
+function xs(d) { return isNaN(d.x)?0:d.y * Math.cos(d.x - Math.PI / 2); }
+function ys(d) { return isNaN(d.x)?0:d.y * Math.sin(d.x - Math.PI / 2); }
 
 function recover(d) {
   d3.select("fieldset").remove();
@@ -315,6 +318,21 @@ function recover(d) {
   })
 }
 
+function showWordList(data) {
+
+  d3.select("fieldset").remove();
+  var fieldset = d3.select("body").append("fieldset")
+    .style("position", "absolute")
+    .style("left", (width+margin['left']+margin['right'])+"px")
+    .style("top", 200+"px");
+
+  fieldset.append("legend").html("Word List");
+  data.forEach(function(element) {
+      fieldset.append("li")
+      .html("<strong>"+ element +"</strong>: ")
+    })
+}
+
 function highlight(d) {
   var path = new Set();
   var node = d;
@@ -326,7 +344,6 @@ function highlight(d) {
   path.add(node.id);
   var legend;
   legend = d.id;
-  console.log(path);
   d3.select("fieldset").remove();
   var fieldset = d3.select("body").append("fieldset")
   .style("position", "absolute")
@@ -337,24 +354,25 @@ function highlight(d) {
     fieldset.append("li")
     .html("<strong>"+ element +"</strong>: ")
   })
-  svg.selectAll('.node circle')
-  .attr("stroke", function(g) {
-    if(path.has(g.id)) {
-      return colormap[d.group].deep;
-    }
-    // else return g.group?colormap[g.group].shallow:"#ccc";
-    else return "#ccc"
-  })
-  svg.selectAll('.link')
-  .attr("stroke", function(g) {
-    if(path.has(g.target.id)) {
-      i+=1; 
-      console.log(i);
-      console.log(g.target.id);
-      return colormap[d.group].deep;
-    }
-    else return "#ccc";
-  })
+  if(d.group) {  
+    svg.selectAll('.node circle')
+    .attr("stroke", function(g) {
+      if(path.has(g.id)) {
+        return colormap[d.group].deep;
+      }
+      else return "#ccc"
+    })
+    svg.selectAll('.link')
+    .attr("stroke", function(g) {
+      if(path.has(g.target.id)) {
+        i+=1; 
+        console.log(i);
+        console.log(g.target.id);
+        return colormap[d.group].deep;
+      }
+      else return "#ccc";
+    })
+  } 
 }
 </script>
 
