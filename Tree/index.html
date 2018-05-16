@@ -4,13 +4,15 @@
     <meta charset="utf-8">
 
     <title>Tree Example</title>
-
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
     <style>
 
   body{
     font: 12px sans-serif;
-    background: #222;
-    color: #aaa;
+    font-family: 'Amatic SC', Calibri, sans-serif;
+    /* background: #222;
+    color: #aaa; */
   }
 	.node {
 		cursor: pointer;
@@ -69,7 +71,6 @@ var g =svg.append("g")
 var nodes;
 var map = d3.map();
 d3.select(self.frameElement).style("height", "500px");
-
 d3.json("sport.json", function(error, data) {
 
   var root = stratify(map, data);
@@ -119,6 +120,7 @@ d3.json("sport.json", function(error, data) {
 
     node.append("circle")
       .attr("r", 3)
+      .attr("id", function(d){return d.id})
       .on("mousemove", function(d){
         highlight(d);
         d3.select(this).attr("r", 5);
@@ -159,17 +161,26 @@ function click(d) {
 }
 
 function highlight(d) {
-  var path = [];
+  var path = new Set();
   while (d.depth>1) {
-    path.push(d);
+    path.add(d);
     d = d.parent;
   }
-  console.log(path);
+  var legend;
+  legend = d.id;
+  d3.select("fieldset").remove();
+  var fieldset = d3.select("body").append("fieldset")
+  .attr("left", d.x+30)
+  .attr("top", d.y+30);
+  fieldset.append("legend").html("Path from "+legend + " to Philosophy");
   path.forEach(function(element) {
-    svg.append("text")
-    .attr("x", element.x + 8)
-    .attr("y", element.y + 8)
-    .text(element.id);
+    fieldset.append("li")
+    .html("<strong>"+ element.id +"</strong>: ")
+  })
+  svg.selectAll('.node circle')
+  .attr("fill", function(d) {
+    if(path.has(d.id)) return "red";
+    else return "grey";
   })
 }
 </script>
