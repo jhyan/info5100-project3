@@ -14,7 +14,7 @@ PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting ur
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 RANDOM_URL = "http://en.wikipedia.org/wiki/Special:Random" # this url is found by using Chrome developer mode
 sports_words = []
-INTERESTED = "animals"
+INTERESTED = "culture"
 with open( './txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
