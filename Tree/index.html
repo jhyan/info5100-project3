@@ -4,13 +4,14 @@
     <meta charset="utf-8">
 
     <title>Tree Example</title>
-    <link href="https://fonts.googleapis.com/css?family=Amatic+SC" rel="stylesheet">
+    <link href="..styles/font.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
     <style>
 
   body{
     font: 12px Calibri;
     color: grey;
+    font-family: 'Merriweather Sans', sans-serif;
     /*font-family: 'Amatic SC', Calibri, sans-serif;*/
     /* background: #222;
     color: #aaa; */
@@ -35,6 +36,23 @@
     left: 500px;
     top: 40px;
   }
+
+fieldset {
+  font-family: 'Josefin Sans', sans-serif;
+  border: solid rgb(229, 177, 58) 1px ;
+}
+fieldset legend {
+  font-family: 'Merriweather Sans', sans-serif;
+  font-size: 11pt;
+  font-weight: bolder;
+  text-align: center;
+}
+fieldset li {
+  text-decoration: none;
+  list-style: none;
+  margin-bottom: 1.5px;
+}
+
     </style>
   }
 
@@ -44,7 +62,7 @@
 <!-- load the d3.js library -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
-<script src="./buildTree2.js"></script>	
+<script src="./buildTree2.js"></script>
 <script>
 // ************** Generate the tree diagram	 *****************
 var tooltip = d3.select("body")
@@ -115,7 +133,7 @@ queue()
       'culture': true,
       'CS': true,
       'animals': true,
-      'sports': true      
+      'sports': true
     }
 
     var button = svg.selectAll(".button")
@@ -192,7 +210,7 @@ function update(duration) {
 
   var circle = g.selectAll(".circle")
     .data(raidus)
-  
+
   var circleExit = circle.exit().remove();
 
   var circleEnter = circle
@@ -235,7 +253,7 @@ function update(duration) {
     .attr("d", function(d) {
       var i = {y:xs(d.source), x:ys(d.source)}
       var o = {y:xs(d.target), x:ys(d.target)}
-      return diagonal({source: o, target: i});      
+      return diagonal({source: o, target: i});
     })
 
   link.exit().remove();
@@ -250,15 +268,15 @@ function update(duration) {
   var nodeEnter = node.enter()
     .append("g")
     .attr("class", "node");
-    
+
   nodeEnter.append("circle")
 	  .attr("r", 1e-6)
     // node.exit().remove()
   var nodeUpdate = node.transition()
       .duration(duration)
       .attr("id", function(d) {return d.id;})
-      .attr("class", function(d) { 
-        return "node" + (d.children ? " node--internal" : " node--leaf"); })   
+      .attr("class", function(d) {
+        return "node" + (d.children ? " node--internal" : " node--leaf"); })
       .attr("transform", function(d) {
         return "translate(" + xs(d) + "," + ys(d) + ")";})
 
@@ -274,6 +292,7 @@ function update(duration) {
           .style("visibility", "visible")
           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
       .on("mouseout", function(d){
+
         d3.select(this).attr("r", 2);
         tooltip.style("visibility", "hidden");
       })
@@ -283,9 +302,9 @@ function update(duration) {
           highlight(d);
         } else {
           d.highlighted = false;
-          recover(d);        
+          recover(d);
         }
-      }) 
+      })
 
 
     // g.selectAll(".node--leaf")
@@ -373,6 +392,7 @@ function highlight(d) {
       else return "#ccc";
     })
   } 
+
 }
 </script>
 
