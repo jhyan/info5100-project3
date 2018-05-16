@@ -79,7 +79,7 @@ var map = d3.map();
 
 d3.select(self.frameElement).style("height", "500px");
 
-d3.json("Math.json", function(error, data) {
+d3.json("sport.json", function(error, data) {
   
   var root = stratify(map, data);
   var nodes = tree.nodes(root).reverse(),
