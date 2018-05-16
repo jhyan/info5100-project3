@@ -7,16 +7,18 @@ from collections import defaultdict
 import json
 import sys
 
-src_url = sys.argv[1]
-des_url = sys.argv[2]
+# src_url = sys.argv[1]
+# des_url = sys.argv[2]
 
 PAGE_CNT = 1 # number of pages used to draw the distribution of distance to philosophy
 TIME_LIMIT = 60 # define "unreachable to philosophy" as "can reach philosophy in 60 seconds"
 PREFIX = "https://en.wikipedia.org" # used to assist generating next visiting url
 PHILOSOPHY = "https://en.wikipedia.org/wiki/Philosophy" # target page
 
+
+INTERESTED = 'animals'
 sports_words = []
-with open(src_url, 'r') as f:
+with open( '../txts/' + INTERESTED + '.txt', 'r') as f:
     for line in f.readlines():
         word = line.strip('\n')
         sports_words.append("https://en.wikipedia.org/wiki/" + word)
@@ -104,9 +106,9 @@ class wiki_page():
                     self.url_candidates.append(url)
         return self.url_candidates
 
+
 def main():
     unreachable = 0 # unreachable url count
-    distri = defaultdict(int) # key: page idx, val: distance to philosophy
     memo = defaultdict(int) # a memo to record the visited page distances to philosophy
     PAGE_CNT = len(sports_words)
     res = [];
@@ -124,6 +126,7 @@ def main():
         res.append([page.url[30:]]) # avoid infinite loops
         # loop until philosophy is found.
         while page.url != PHILOSOPHY:
+            print (page.url)
             #if add_node not in data['nodes']:
                 #data["nodes"].append(add_node)
                 # nodes_set.add(page.url)
@@ -167,15 +170,9 @@ def main():
 
     # summary printout
     print ("res: \n", res)
-    # print ("data: \n", data)
-
-    # print ("memo: ", memo)
-    # print ("distribution: ", distri)
-    # print("unreachable: ", unreachable)
-    # print ( "reachable rate: " + str((PAGE_CNT - unreachable)/float(PAGE_CNT)))
 
     data = json.dumps(res)
-    with open(des_url, 'w') as f:
+    with open("../jsons/" + INTERESTED + '_tree' + ".json", 'w') as f:
         f.write(data)
 
 
