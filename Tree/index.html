@@ -4,65 +4,77 @@
     <meta charset="utf-8">
 
     <title>Tree Example</title>
-    <link href="..styles/font.css" rel="stylesheet">
+    <link href="./styles/font.css" rel="stylesheet">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/default.min.css">
     <style>
-
-  body{
-    font: 12px Calibri;
-    color: grey;
-    font-family: 'Merriweather Sans', sans-serif;
-    /*font-family: 'Amatic SC', Calibri, sans-serif;*/
-    /* background: #222;
-    color: #aaa; */
-  }
-	.node {
-		cursor: pointer;
-	}
-	.node circle {
-	  fill: #fff;
-	  stroke-width: 3px;
-	}
-	.node text {
-	  font: 12px sans-serif;
-	}
-	.link {
-	  fill: none;
-	  /*stroke: #ccc;*/
-	  stroke-width: 2px;
-	}
-  h1 {
-    position: absolute;
-    left: 500px;
-    top: 40px;
-  }
-
-fieldset {
-  font-family: 'Josefin Sans', sans-serif;
-  border: solid rgb(229, 177, 58) 1px ;
-}
-fieldset legend {
-  font-family: 'Merriweather Sans', sans-serif;
-  font-size: 11pt;
-  font-weight: bolder;
-  text-align: center;
-}
-fieldset li {
-  text-decoration: none;
-  list-style: none;
-  margin-bottom: 1.5px;
-}
-
+    body{
+      width: 1400px;
+      font: 12px Calibri;
+      color: grey;
+      font-family: 'Merriweather Sans', sans-serif;
+    }
+  	.node {
+  		cursor: pointer;
+  	}
+  	.node circle {
+  	  fill: #fff;
+  	  stroke-width: 3px;
+  	}
+  	.node text {
+  	  font: 12px sans-serif;
+  	}
+  	.link {
+  	  stroke-width: 2px;
+  	}
+    h1 {
+      margin-top:30px; 
+      text-align: center;
+    }
+    p {
+      font-size: 13px;
+      font-style: italic;
+      padding: 0 60px;
+      margin: 0px;
+/*      position: absolute;
+      left: 500px;
+      top: 20px;*/
+    }
+    span {
+      font-weight: 120pt;
+      font-style: italic;
+    }
+    fieldset {
+      font-family: 'Josefin Sans', sans-serif;
+      border: solid rgb(229, 177, 58) 1px ;
+    }
+    fieldset legend {
+      font-family: 'Merriweather Sans', sans-serif;
+      font-size: 11pt;
+      font-weight: bolder;
+      text-align: center;
+    }
+    fieldset li {
+      text-decoration: none;
+      list-style: none;
+      margin-bottom: 1.5px;
+    }
     </style>
-  }
 
   </head>
   <body>
 <h1>Path To Philosophy Through Wikipedia</h1>
-<!-- load the d3.js library -->
+<p>
+  This visualization depicts a peculiar property of <strong>Wikipedia</strong>: <span>if you navigate to a Wikipedia article, click on the first hyperlink in the article, and then repeat this process for each subsequent page, eventually you will end up on the Wikipedia page for <strong>“Philosophy”</strong> roughly 95% of the time</span>.
+</p>
+<p>
+This characteristic is a result of the classification-based nature of Wikipedia articles. The first sentence of each page is an introductory definition of the subject; inherently, when defining a topic we typically use nouns that are slightly less specific than the topic we are describing. By continuously applying this rationale and ‘going up one level of abstraction’ for each topic we encounter, eventually we end up describing Philosophy - the fundamental understanding of thought and reality.
+</p>
+<p>
+Our visualization shows the <strong>“Path to Philosophy”</strong> for 120 different topics from four different categories. <strong>Click</strong> on a <strong>node</strong> to see detailed information about that topic’s path, or on a <strong>button</strong> to filter out that category
+</p>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script src="http://d3js.org/queue.v1.min.js"></script>
-<script src="./buildTree2.js"></script>
+<script src="./js/buildTree.js"></script>
 <script>
 // ************** Generate the tree diagram	 *****************
 var tooltip = d3.select("body")
@@ -75,7 +87,7 @@ var tooltip = d3.select("body")
   .style("border-radius", "4px")
   .style("padding", '5px');
 
-var margin = {top: 20, right: 120, bottom: 20, left: 120},
+var margin = {top: 0, right: 100, bottom: 20, left: 60},
 	width = 1200 - margin.right - margin.left,
 	height = 1200 - margin.top - margin.bottom;
 
@@ -117,11 +129,10 @@ var colormap = {
 d3.select(self.frameElement).style("height", "500px");
 
 queue()
-  // .defer(d3.json, "sport.json")
-  .defer(d3.json, "../jsons/culture_tree.json")
-  .defer(d3.json, "../jsons/compsci_tree.json")
-  .defer(d3.json, "../jsons/animals_tree.json")
-  .defer(d3.json, "../jsons/sports_tree.json")
+  .defer(d3.json, "./data/culture_tree.json")
+  .defer(d3.json, "./data/compsci_tree.json")
+  .defer(d3.json, "./data/animals_tree.json")
+  .defer(d3.json, "./data/sports_tree.json")
   .await(function(err, data1, data2, data3, data4) {
     datamap = {
       'culture': data1.filter(d=>d!=undefined),
@@ -155,13 +166,12 @@ queue()
           return controller[d]?colormap[d].deep:"#fff";
         })
         update(500);
-
       })
 
     button
       .append("rect")
-      .attr('x', function(d, i) {return i*80+100})
-      .attr('y', function(d, i) {return 100})
+      .attr('x', function(d, i) {return i*80+margin.left})
+      .attr('y', function(d, i) {return 40})
       .attr('width', function(d, i) {return 70})
       .attr('height', function(d, i) {return 40})
       .attr('fill', function(d) {
@@ -174,12 +184,10 @@ queue()
       .attr("rx", 5)
       .attr("ry", 5)
 
-
     button
       .append("text")
-      .attr('x', function(d, i) {return i*80+100+35})
-      .attr('y', function(d, i) {return 100+25})
-      .attr()
+      .attr('x', function(d, i) {return i*80+margin.left+35})
+      .attr('y', function(d, i) {return 40+25})
       .attr('text-anchor', 'middle')
       .text(function(d) {return d});
 
@@ -188,7 +196,6 @@ queue()
   })
 
 function update(duration) {
-
 
   var map = d3.map();
   var root = {};
@@ -200,7 +207,6 @@ function update(duration) {
     }
   }
 
-  // console.log("numbre of nodes is %d", data.length);
   nodes = tree.nodes(root).reverse(),
   links = tree.links(nodes);
   showWordList(data.map(d=>d[d.length-1]))
@@ -258,8 +264,6 @@ function update(duration) {
 
   link.exit().remove();
 
-
-
   var node = g.selectAll(".node")
     .data(nodes)
 
@@ -271,7 +275,7 @@ function update(duration) {
 
   nodeEnter.append("circle")
 	  .attr("r", 1e-6)
-    // node.exit().remove()
+
   var nodeUpdate = node.transition()
       .duration(duration)
       .attr("id", function(d) {return d.id;})
@@ -306,15 +310,6 @@ function update(duration) {
         }
       })
 
-
-    // g.selectAll(".node--leaf")
-    //   .append("text")
-    //   .attr("dy", "0.31em")
-    //   .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
-    //   .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
-    //   .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
-    //   .text(function(d) { return d.children?"":d.id; });
-  // Stash the old positions for transition.
   nodes.forEach(function(d) {
     d.x0 = d.x;
     d.y0 = d.y;
@@ -343,7 +338,7 @@ function showWordList(data) {
   var fieldset = d3.select("body").append("fieldset")
     .style("position", "absolute")
     .style("left", (width+margin['left']+margin['right'])+"px")
-    .style("top", 200+"px");
+    .style("top", 240+"px");
 
   fieldset.append("legend").html("Word List");
   data.forEach(function(element) {
@@ -353,6 +348,7 @@ function showWordList(data) {
 }
 
 function highlight(d) {
+  d3.select("fieldset").remove();
   var path = new Set();
   var node = d;
   var i = 0;
@@ -365,9 +361,9 @@ function highlight(d) {
   legend = d.id;
   d3.select("fieldset").remove();
   var fieldset = d3.select("body").append("fieldset")
-  .style("position", "absolute")
-  .style("left", (width+margin['left']+margin['right'])+"px")
-  .style("top", 200+"px");
+    .style("position", "absolute")
+    .style("left", (width+margin['left']+margin['right'])+"px")
+    .style("top", 240+"px");
   fieldset.append("legend").html("Path from "+legend + " to Philosophy");
   path.forEach(function(element) {
     fieldset.append("li")
