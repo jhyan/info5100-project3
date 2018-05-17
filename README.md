@@ -4,9 +4,10 @@ A visualization for an interesting and peculiar property of Wikipedia. If you na
 
 ### Run
 ```bash
+cd Tree
 python -m SimpleHTTPServer 8000
 ```
 
 ### Data
 * source: in _txts_ folder
-* processed data: in _jsons_ folder
+* processed data: in _Tree/jsons_ folder
