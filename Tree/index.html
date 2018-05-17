@@ -9,7 +9,7 @@
     <style>
     body{
       width: 1400px;
-      font: 12px Calibri;
+      font: 13px Calibri;
       color: grey;
       font-family: 'Merriweather Sans', sans-serif;
     }
@@ -35,9 +35,7 @@
       font-style: italic;
       padding: 0 60px;
       margin: 0px;
-/*      position: absolute;
-      left: 500px;
-      top: 20px;*/
+
     }
     span {
       font-weight: 120pt;
@@ -125,6 +123,7 @@ var colormap = {
     shallow: '#3E93C7'
   }
 }
+var data;
 
 d3.select(self.frameElement).style("height", "500px");
 
@@ -164,6 +163,10 @@ queue()
         d3.select(this).select("rect")
         .attr('fill', function(d) {
           return controller[d]?colormap[d].deep:"#fff";
+        });
+        d3.select(this).select("text")
+        .attr('fill', function(d) {
+          return controller[d]?"#fff":colormap[d].deep;
         })
         update(500);
       })
@@ -177,6 +180,7 @@ queue()
       .attr('fill', function(d) {
         return controller[d]?colormap[d].deep:"#fff";
       })
+      .attr('stroke-width', "2px")
       .attr('stroke', function(d) {
         return colormap[d].deep;
       })
@@ -189,6 +193,7 @@ queue()
       .attr('x', function(d, i) {return i*80+margin.left+35})
       .attr('y', function(d, i) {return 40+25})
       .attr('text-anchor', 'middle')
+      .attr('fill', "#fff")
       .text(function(d) {return d});
 
     update(500);
@@ -199,19 +204,22 @@ function update(duration) {
 
   var map = d3.map();
   var root = {};
-  var data = [];
+  data = [];
+  var maxDepth = 0;
   for(var key in controller) {
     if(controller[key]) {
       root = stratify(map, datamap[key], key);
-      data = data.concat(datamap[key]);
+      var words = datamap[key].map(d => d[d.length-1]);
+      maxDepth = Math.max(maxDepth, d3.max(datamap[key].map(d=>d.length))) 
+      words = words.map(function(d) {return {id:d, group:key}})
+      data = data.concat(words)
     }
   }
 
   nodes = tree.nodes(root).reverse(),
   links = tree.links(nodes);
-  showWordList(data.map(d=>d[d.length-1]))
+  showWordList(data)
 
-  var maxDepth = d3.max(data.map(d=>d.length));
   var raidus = d3.range(0, maxDepth, 1)
 
   var circle = g.selectAll(".circle")
@@ -285,9 +293,11 @@ function update(duration) {
         return "translate(" + xs(d) + "," + ys(d) + ")";})
 
   node.select("circle")
-      .attr("r", 2)
+      .attr("r", function(d) {
+        return d.id=="Philosophy"?4:2
+      })
       .attr("stroke", function(d) {
-        return d.group?colormap[d.group].shallow:"#ccc";
+        return d.id == 'Philosophy'?"grey":d.group?colormap[d.group].shallow:"#ccc";
       })
       .on("mousemove", function(d){
         d3.select(this).attr("r", 5);
@@ -296,8 +306,10 @@ function update(duration) {
           .style("visibility", "visible")
           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
       .on("mouseout", function(d){
-
-        d3.select(this).attr("r", 2);
+        d3.select(this)
+        .attr("r", function(d) {
+          return d.id=="Philosophy"?4:2
+        })
         tooltip.style("visibility", "hidden");
       })
       .on('click', function(d) {
@@ -324,7 +336,7 @@ function recover(d) {
   d3.select("fieldset").remove();
   svg.selectAll('.node circle')
   .attr("stroke", function(g) {
-    return g.group?colormap[g.group].shallow:"#ccc";
+    return g.id=="Philosophy"?"grey": g.group?colormap[g.group].shallow:"#ccc";
   })
   svg.selectAll('.link')
   .attr("stroke", function(g) {
@@ -343,7 +355,7 @@ function showWordList(data) {
   fieldset.append("legend").html("Word List");
   data.forEach(function(element) {
       fieldset.append("li")
-      .html("<strong>"+ element +"</strong>: ")
+      .html("<strong>"+ element.id +"</strong>: ")
     })
 }
 
