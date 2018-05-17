@@ -302,7 +302,7 @@ function update(duration) {
       .on("mousemove", function(d){
         d3.select(this).attr("r", 5);
         tooltip
-          .text(d.id)
+          .text(d.id.replace(/_|:/g, " "))
           .style("visibility", "visible")
           .style("top", (event.pageY-15)+"px").style("left",(event.pageX+5)+"px");})
       .on("mouseout", function(d){
@@ -355,7 +355,7 @@ function showWordList(data) {
   fieldset.append("legend").html("Word List");
   data.forEach(function(element) {
       fieldset.append("li")
-      .html("<strong>"+ element.id +"</strong>: ")
+      .html("<strong>"+ element.id +"</strong> ")
     })
 }
 
@@ -379,7 +379,7 @@ function highlight(d) {
   fieldset.append("legend").html("Path from "+legend + " to Philosophy");
   path.forEach(function(element) {
     fieldset.append("li")
-    .html("<strong>"+ element +"</strong>: ")
+    .html("<strong>"+ element.replace(/_|:/g, " ") +"</strong> ")
   })
   if(d.group) {  
     svg.selectAll('.node circle')
